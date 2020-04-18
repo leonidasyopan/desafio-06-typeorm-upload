@@ -7,7 +7,6 @@ import TransactionsRepository from '../repositories/TransactionsRepository';
 import AppError from '../errors/AppError';
 
 interface Request {
-  id: string;
   title: string;
   type: 'income' | 'outcome';
   value: number;
@@ -23,7 +22,8 @@ class CreateTransactionService {
   }: Request): Promise<Transaction> {
     const transactionsRepository = getCustomRepository(TransactionsRepository);
 
-    const { total } = transactionsRepository.getBalance();
+    const balance = await transactionsRepository.getBalance();
+    const { total } = balance;
 
     if (type === 'outcome' && Number(value) > Number(total)) {
       throw new AppError(`You don't have this amount to spend.`);
