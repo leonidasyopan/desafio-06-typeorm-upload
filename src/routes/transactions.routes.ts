@@ -4,8 +4,8 @@ import { getCustomRepository } from 'typeorm';
 import CreateCategoryService from '../services/CreateCategoryService';
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import CreateTransactionService from '../services/CreateTransactionService';
-// import DeleteTransactionService from '../services/DeleteTransactionService';
-// import ImportTransactionsService from '../services/ImportTransactionsService';
+import DeleteTransactionService from '../services/DeleteTransactionService';
+import ImportTransactionsService from '../services/ImportTransactionsService';
 
 const transactionsRouter = Router();
 
@@ -13,8 +13,18 @@ const transactionsRouter = Router();
 
 transactionsRouter.get('/', async (request, response) => {
   const transactionsRepository = getCustomRepository(TransactionsRepository);
-  const transactions = await transactionsRepository.find();
   const balance = await transactionsRepository.getBalance();
+  const transactions = await transactionsRepository.find({
+    relations: ['category'],
+  });
+
+  transactions.map(transaction => {
+    delete transaction.created_at;
+    delete transaction.updated_at;
+    delete transaction.category.created_at;
+    delete transaction.category.updated_at;
+    return transaction;
+  });
 
   const completeData = {
     transactions,
@@ -45,13 +55,19 @@ transactionsRouter.post('/', async (request, response) => {
 
   return response.json(transaction);
 });
-/*
+
 transactionsRouter.delete('/:id', async (request, response) => {
-  // TODO
+  const { id } = request.params;
+
+  const deleteTransaction = new DeleteTransactionService();
+
+  deleteTransaction.execute({
+    id,
+  });
+
+  return response.json({ message: 'Transaction Deleted Successfully' });
 });
 
-transactionsRouter.post('/import', async (request, response) => {
-  // TODO
-});
-*/
+transactionsRouter.post('/import', async (request, response) => {});
+
 export default transactionsRouter;
