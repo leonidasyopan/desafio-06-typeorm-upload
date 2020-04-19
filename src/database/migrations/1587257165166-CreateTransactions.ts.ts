@@ -2,7 +2,7 @@ import {
   MigrationInterface,
   QueryRunner,
   Table,
-  TableForeignKey,
+  // TableForeignKey,
 } from 'typeorm';
 
 export default class CreateTransactions1587166138509
@@ -34,11 +34,11 @@ export default class CreateTransactions1587166138509
             type: 'integer',
             isNullable: false,
           },
-          {
-            name: 'category_id',
-            type: 'uuid',
-            isNullable: false,
-          },
+          // {
+          //   name: 'category_id',
+          //   type: 'uuid',
+          //   isNullable: false,
+          // },
           {
             name: 'created_at',
             type: 'timestamp',
@@ -53,21 +53,21 @@ export default class CreateTransactions1587166138509
       }),
     );
 
-    await queryRunner.createForeignKey(
-      'transactions',
-      new TableForeignKey({
-        name: 'transaction_category_fk',
-        columnNames: ['category_id'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'categories',
-        onDelete: 'SET NULL',
-        onUpdate: 'CASCADE',
-      }),
-    );
+    // await queryRunner.createForeignKey(
+    //   'transactions',
+    //   new TableForeignKey({
+    //     name: 'transaction_category_fk',
+    //     columnNames: ['category_id'],
+    //     referencedColumnNames: ['id'],
+    //     referencedTableName: 'categories',
+    //     onDelete: 'SET NULL',
+    //     onUpdate: 'CASCADE',
+    //   }),
+    // );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropTable('transactions');
-    await queryRunner.dropForeignKey('transactions', 'transaction_category_fk');
+    // await queryRunner.dropForeignKey('transactions', 'transaction_category_fk');
   }
 }
