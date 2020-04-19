@@ -1,13 +1,16 @@
-// import { getRepository } from 'typeorm';
-import csv from 'csv-parser';
-import path from 'path';
 import fs from 'fs';
+import neatCsv from 'neat-csv';
+
+import path from 'path';
+
+import uploadConfig from '../config/upload';
+
 import CreateTransactionService from './CreateTransactionService';
 import CreateCategoryService from './CreateCategoryService';
-import uploadConfig from '../config/upload';
+
 import Transaction from '../models/Transaction';
 
-import AppError from '../errors/AppError';
+// import AppError from '../errors/AppError';
 
 interface TransactionImport {
   title: string;
@@ -27,34 +30,21 @@ class ImportTransactionsService {
     const createTransaction = new CreateTransactionService();
     const createCategory = new CreateCategoryService();
 
-    const transactions: TransactionImport[] = [];
-    const transactionsCreated: Transaction[] = [];
+    const transactions: Transaction[] = [];
 
-    fs.createReadStream(fileCompletePath)
-      .pipe(csv({ columns: true, from_line: 1, trim: true }))
-      .on('data', row => {
-        try {
-          transactions.push(row);
-          console.log(transactions);
-        } catch (err) {
-          throw new AppError(
-            'There was an error uploading the file. Please try again.',
-          );
-        }
-      })
-      .on('end', () => {
-        console.log('CSV file successfully processed');
-      });
+    const rawData = await fs.promises.readFile(fileCompletePath);
 
-    console.log(`outside importattion. Before map`);
+    const organizedData = await neatCsv<TransactionImport>(rawData, {
+      mapHeaders: ({ header }) => header.trim(),
+      mapValues: ({ value }) => value.trim(),
+    });
 
-    transactions.map(async transaction => {
+    await organizedData.map(async transaction => {
       const categoryCheck = await createCategory.execute({
         title: transaction.category,
       });
 
       const category_id = categoryCheck.id;
-      console.log(category_id);
 
       const trans = await createTransaction.execute({
         title: transaction.title,
@@ -63,11 +53,12 @@ class ImportTransactionsService {
         category_id,
       });
 
-      console.log(trans);
-      transactionsCreated.push(trans);
+      await transactions.push(trans);
     });
 
-    return transactionsCreated;
+    await fs.promises.unlink(fileCompletePath);
+
+    return transactions;
   }
 }
 
