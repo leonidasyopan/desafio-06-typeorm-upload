@@ -21,6 +21,7 @@ transactionsRouter.get('/', async (request, response) => {
     relations: ['category'],
   });
 
+  /*
   transactions.map(transaction => {
     delete transaction.created_at;
     delete transaction.updated_at;
@@ -28,6 +29,7 @@ transactionsRouter.get('/', async (request, response) => {
     delete transaction.category.updated_at;
     return transaction;
   });
+  */
 
   const completeData = {
     transactions,
