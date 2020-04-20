@@ -22,8 +22,8 @@ class CreateTransactionService {
   }: Request): Promise<Transaction> {
     const transactionsRepository = getCustomRepository(TransactionsRepository);
 
-    const balance = await transactionsRepository.getBalance();
-    const { total } = balance;
+    const { total } = await transactionsRepository.getBalance();
+    // const { total } = balance;
 
     if (type === 'outcome' && Number(value) > Number(total)) {
       throw new AppError(`You don't have this amount to spend.`);
