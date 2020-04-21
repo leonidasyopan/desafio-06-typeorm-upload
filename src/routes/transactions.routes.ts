@@ -21,6 +21,15 @@ transactionsRouter.get('/', async (request, response) => {
     relations: ['category'],
   });
 
+  // const cleanTransactions = await transactions.filter(transaction => {
+  //   return (
+  //     !transaction.created_at &&
+  //     !transaction.updated_at &&
+  //     !transaction.category.created_at &&
+  //     !transaction.category.updated_at
+  //   );
+  // });
+
   /*
   transactions.map(transaction => {
     delete transaction.created_at;
